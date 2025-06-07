@@ -1,5 +1,3 @@
-// page.tsx
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -44,7 +42,6 @@ export default function Home() {
         ),
       false
     );
-    // Remove duplicate toast notification
     // toast.success("Challenge completed!");
   };
 
@@ -168,7 +165,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Right Side: Questions Menu */}
       <div className="w-full lg:w-1/4 flex flex-col border-l border-gray-700 p-4 overflow-y-auto bg-gray-800">
         <QuestionsMenu
           questions={questions}
@@ -179,7 +175,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Toast Notifications */}
       <ToastContainer
         position="top-right"
         autoClose={3000}

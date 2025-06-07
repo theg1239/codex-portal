@@ -1,5 +1,3 @@
-// app/api/questions/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../lib/db';
 import { Question } from '../../../lib/types';

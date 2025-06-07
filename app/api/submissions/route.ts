@@ -1,5 +1,3 @@
-// app/api/submissions/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../lib/db';
 import { getServerSession } from 'next-auth';
@@ -16,7 +14,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Optional: Check if the user has admin privileges
     // if (!session.user.isAdmin) {
     //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     // }

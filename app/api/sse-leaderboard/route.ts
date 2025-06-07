@@ -50,13 +50,11 @@ export async function GET(request: NextRequest) {
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
 
-  // Send initial data immediately
   if (globalThis.leaderboardData.length > 0) {
     const payload = `data: ${JSON.stringify(globalThis.leaderboardData)}\n\n`;
     writer.write(payload);
   }
 
-  // Add new client
   globalThis.leaderboardClients.add(writer);
   console.log(
     'New client connected. Total clients:',

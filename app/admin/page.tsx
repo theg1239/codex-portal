@@ -19,7 +19,7 @@ interface Question {
   name: string;
   description: string;
   difficulty: string;
-  answer?: string; // Optional answer field
+  answer?: string;
 }
 
 interface Submission {
@@ -37,7 +37,7 @@ export default function AdminPage() {
   const [questionName, setQuestionName] = useState("");
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("Medium");
-  const [answer, setAnswer] = useState(""); // Only Answer field now
+  const [answer, setAnswer] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const [activeQuestions, setActiveQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -93,7 +93,6 @@ export default function AdminPage() {
     e.preventDefault();
     setResponseMessage("");
 
-    // Ensure that the answer field is filled
     if (!answer) {
       setResponseMessage("The 'Answer' field must be filled.");
       return;
@@ -107,7 +106,7 @@ export default function AdminPage() {
           questionName,
           description,
           difficulty,
-          answer, // Answer is mandatory
+          answer,
         }),
       });
 
@@ -234,7 +233,6 @@ export default function AdminPage() {
         </Card>
       </div>
 
-      {/* Middle: Add New Question */}
       <div className="w-full lg:w-1/2 p-4 flex flex-col bg-gray-900">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl md:text-4xl font-bold text-green-500">
@@ -311,7 +309,6 @@ export default function AdminPage() {
         </div>
       </div>
 
-{/* Right Side: Submissions */}
 <div className="w-full lg:w-1/4 flex flex-col border-l border-gray-700 p-4 bg-gray-800 h-full">
   <Card className="bg-gray-800 text-green-500 h-full">
     <CardHeader>

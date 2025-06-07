@@ -1,5 +1,3 @@
-// lib/auth.ts
-
 import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import pool from './db';
@@ -23,7 +21,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account }) {
-      console.log('Sign-in attempt:', user.email); // Log sign-in attempts
+      console.log('Sign-in attempt:', user.email);
       if (user.email?.endsWith('@vitstudent.ac.in')) {
         try {
           const client = await pool.connect();

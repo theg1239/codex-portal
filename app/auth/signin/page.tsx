@@ -81,7 +81,6 @@ export default function SignIn() {
       {/* Background circles */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="circle-grid">
-          {/* Creating grid of animated circles */}
           {[...Array(300)].map((_, i) => (
             <img
               key={i}
@@ -94,7 +93,6 @@ export default function SignIn() {
         </div>
       </div>
 
-      {/* Sign-in components */}
       <div className="flex items-center justify-center h-full z-10 relative">
         <div className="w-full max-w-md p-8 bg-black border border-green-500 rounded">
           <div className="mb-6">
@@ -121,7 +119,6 @@ export default function SignIn() {
         </div>
       </div>
 
-      {/* CSS-in-JS Styles */}
       <style jsx>{`
         .circle-grid {
           position: absolute;

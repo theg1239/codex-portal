@@ -1,9 +1,7 @@
-// app/api/questions/[id]/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../lib/db';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../lib/auth'; // Adjust the import path as needed
+import { authOptions } from '../../../../lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +42,6 @@ export async function DELETE(
       );
     }
 
-    // Optional: Check if the user has admin privileges
     // if (!session.user.isAdmin) {
     //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     // }

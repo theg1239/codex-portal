@@ -1,5 +1,3 @@
-// lib/sse.ts
-
 let clients: ReadableStreamDefaultController[] = [];
 
 export function sendToClients(newData: any) {

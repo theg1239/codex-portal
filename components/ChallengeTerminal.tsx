@@ -30,13 +30,12 @@ export default function ChallengeTerminal({
   const isChangingDirectoryRef = useRef(false);
   const hasInitializedRef = useRef(false);
 
-  const MAX_TERMINAL_LINES = 19; // Max lines in the terminal output
+  const MAX_TERMINAL_LINES = 19;
 
-  // Append new messages to the terminal output, keeping a maximum of 10 lines
   const appendToTerminal = useCallback((messages: string[]) => {
     setTerminalOutput((prev) => {
       const newOutput = [...prev, ...messages];
-      return newOutput.slice(-MAX_TERMINAL_LINES); // Keep only the last MAX_TERMINAL_LINES lines
+      return newOutput.slice(-MAX_TERMINAL_LINES);
     });
   }, []);
 
