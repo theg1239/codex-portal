@@ -56,6 +56,16 @@ export default function Leaderboard({ currentUserName }: LeaderboardProps) {
     (entry) => entry.user_name === session?.user?.name
   );
 
+  const formatDisplayName = (name: string) => {
+    const sanitized = DOMPurify.sanitize(name, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+    });
+    const words = sanitized.trim().split(/\s+/);
+    const truncated = words.slice(0, 3).join(' ');
+    return truncated || sanitized;
+  };
+
   const topTierGradients = [
     "bg-gradient-to-r from-yellow-500/20 to-yellow-500/5 border border-yellow-500/30",
     "bg-gradient-to-r from-gray-200/15 to-gray-500/5 border border-gray-400/30",
@@ -91,7 +101,7 @@ export default function Leaderboard({ currentUserName }: LeaderboardProps) {
                     <div className="flex items-center gap-2">
                       {index < 3 && <span className="text-lg">{medals[index]}</span>}
                       <h4 className="text-lg font-medium">
-                        {DOMPurify.sanitize(player.user_name)}
+                        {formatDisplayName(player.user_name)}
                         {isCurrentUser ? " (You)" : ""}
                       </h4>
                     </div>
@@ -121,7 +131,7 @@ export default function Leaderboard({ currentUserName }: LeaderboardProps) {
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
                 <h4 className="text-lg font-medium">
-                  {DOMPurify.sanitize(userEntry.user_name)} (You)
+                  {formatDisplayName(userEntry.user_name)} (You)
                 </h4>
                 <span className="text-sm">
                   Rank:{" "}
