@@ -21,9 +21,10 @@ export async function POST(request: NextRequest) {
     console.log(`User authenticated: ${session.user.name}`);
 
     const { questionId, userAnswer } = await request.json();
-    console.log(`Received questionId: ${questionId}, userAnswer: ${userAnswer}`);
+    const normalizedQuestionId = typeof questionId === 'string' ? questionId.trim() : `${questionId}`;
+    console.log(`Received questionId: ${normalizedQuestionId}, userAnswer: ${userAnswer}`);
 
-    if (!questionId || !userAnswer) {
+    if (!normalizedQuestionId || !userAnswer) {
       console.log('Missing question ID or answer in the request');
       return NextResponse.json(
         { error: 'Question ID and answer are required.' },
@@ -31,8 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const questionIdInt = parseInt(questionId, 10);
-    if (isNaN(questionIdInt)) {
+    if (!/^(\d+)$/.test(normalizedQuestionId)) {
       console.log('Invalid question ID format');
       return NextResponse.json({ error: 'Invalid question ID.' }, { status: 400 });
     }
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
       const questionResult = await client.query(
         'SELECT answer, must_include FROM questions WHERE id = $1',
-        [questionIdInt]
+        [normalizedQuestionId]
       );
 
       if (questionResult.rowCount === 0) {
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       await client.query(
         `INSERT INTO submissions (user_name, question_id, correct)
          VALUES ($1, $2, $3)`,
-        [userName, questionIdInt, correctValue]
+        [userName, normalizedQuestionId, correctValue]
       );
 
       if (correctValue) {
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
           `INSERT INTO user_challenge_completions (user_name, question_id, completed)
            VALUES ($1, $2, true)
            ON CONFLICT (user_name, question_id) DO NOTHING`,
-          [userName, questionIdInt]
+          [userName, normalizedQuestionId]
         );
 
         await client.query(
