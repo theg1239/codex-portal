@@ -261,13 +261,13 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-900 text-green-500 font-mono">
       {/* Left Side: Active Questions */}
-      <div className="w-full lg:w-1/4 flex flex-col border-r border-gray-700 p-4 bg-gray-800">
-        <Card className="bg-gray-800 text-green-500 shadow-lg">
+      <div className="w-full lg:w-1/4 flex flex-col border-r border-gray-700 p-4 bg-gray-800 min-h-0">
+        <Card className="bg-gray-800 text-green-500 shadow-lg flex flex-col min-h-0">
           <CardHeader>
             <CardTitle className="text-xl font-bold">Active Questions</CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="max-h-[65vh] px-4 py-3">
+          <CardContent className="p-0 flex-1 min-h-0">
+            <ScrollArea className="h-full px-4 py-3">
               {activeQuestions.length ? (
                 <ul className="space-y-2 pr-2">
                   {activeQuestions.map((question) => (
@@ -312,7 +312,7 @@ export default function AdminPage() {
         </Card>
       </div>
 
-      <div className="w-full lg:w-1/2 p-4 flex flex-col bg-gray-900">
+      <div className="w-full lg:w-1/2 p-4 flex flex-col bg-gray-900 min-h-0">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl md:text-4xl font-bold text-green-500">
             Admin Dashboard
@@ -403,12 +403,12 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="w-full lg:w-1/4 flex flex-col border-l border-gray-700 p-4 bg-gray-800">
-        <Card className="bg-gray-800 text-green-500 h-full shadow-lg">
+      <div className="w-full lg:w-1/4 flex flex-col border-l border-gray-700 p-4 bg-gray-800 min-h-0">
+        <Card className="bg-gray-800 text-green-500 h-full shadow-lg flex flex-col min-h-0">
           <CardHeader>
             <CardTitle className="text-xl font-bold">Submissions</CardTitle>
           </CardHeader>
-          <CardContent className="flex-grow p-0">
+          <CardContent className="flex-1 p-0 min-h-0">
             <ScrollArea className="h-full px-4 py-3">
               {submissions.length ? (
                 <ul className="space-y-2 pr-2">
