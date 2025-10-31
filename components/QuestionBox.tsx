@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "./ui/Button";
 import { Card, CardContent } from "./ui/Card";
+import ScrollArea from "./ui/ScrollArea";
 import { Input } from "./ui/Input";
 import { toast } from "react-toastify";
 import { Question } from "../lib/types";
@@ -48,7 +49,7 @@ export default function QuestionBox({ question, onSubmitAnswer }: QuestionBoxPro
 
   return (
     <Card
-      className="h-full flex flex-col justify-between bg-gray-900 text-green-500 relative border border-white overflow-hidden"
+      className="h-full flex flex-col bg-gray-900 text-green-500 relative border border-white overflow-hidden min-h-0"
     >
       <div
         className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center"
@@ -59,23 +60,26 @@ export default function QuestionBox({ question, onSubmitAnswer }: QuestionBoxPro
           className="max-w-xs"
         />
       </div>
-      <CardContent className="flex-grow relative z-10">
-        {/* Title */}
-        <h2 className="text-3xl font-semibold mt-6 mb-6 text-green-500">
-          Question: {question.name}
-        </h2>
-        <div
-          className="text-lg text-gray-300 mb-6 whitespace-pre-wrap question-description"
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(question.description, {
-              ADD_TAGS: ["a", "br"], 
-              ADD_ATTR: ["href", "target", "rel"], 
-            }),
-          }}
-        ></div>
+      <CardContent className="flex-1 min-h-0 relative z-10 overflow-hidden p-6">
+        <ScrollArea className="h-full pr-2 p-0">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-semibold text-green-500">
+              Question: {question.name}
+            </h2>
+            <div
+              className="text-lg text-gray-300 whitespace-pre-wrap question-description"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(question.description, {
+                  ADD_TAGS: ["a", "br"],
+                  ADD_ATTR: ["href", "target", "rel"],
+                }),
+              }}
+            ></div>
+          </div>
+        </ScrollArea>
       </CardContent>
       {/* Answer Input and Submit Button */}
-      <CardContent className="pt-0 flex items-center justify-between relative z-10">
+      <CardContent className="pt-0 flex items-center justify-between relative z-10 gap-3 shrink-0">
         <Input
           type="text"
           placeholder="Answer"
@@ -88,7 +92,7 @@ export default function QuestionBox({ question, onSubmitAnswer }: QuestionBoxPro
         <Button
           onClick={handleSubmit}
           variant="primary"
-          className="ml-4 bg-green-600 hover:bg-green-700"
+          className="bg-green-600 hover:bg-green-700"
           disabled={question.completed || isSubmitting}
         >
           {isSubmitting ? "Submitting..." : "Submit"}

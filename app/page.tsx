@@ -125,7 +125,7 @@ export default function Home() {
       </div>
 
       {/* Middle: Challenge Terminal or Question Box */}
-      <div className="w-full lg:w-1/2 p-4 flex flex-col bg-gray-900">
+      <div className="w-full lg:w-1/2 p-4 flex flex-col bg-gray-900 min-h-0">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl md:text-4xl font-bold text-green-500">
             Codex Cryptum v3.0
@@ -139,7 +139,7 @@ export default function Home() {
           </Button>
         </div>
 
-        <div className="flex-grow relative">
+        <div className="flex-grow relative min-h-0">
           {selectedQuestion ? (
             <>
               {isTerminalOpen ? (
@@ -165,7 +165,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="w-full lg:w-1/4 flex flex-col border-l border-gray-700 p-4 overflow-y-auto bg-gray-800">
+      <div className="w-full lg:w-1/4 flex flex-col border-l border-gray-700 p-4 bg-gray-800">
         <QuestionsMenu
           questions={questions}
           selectedQuestion={selectedQuestion}

@@ -15,7 +15,7 @@ const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
       <div
         ref={ref}
         className={cn(
-          'overflow-y-auto max-h-full p-4 scrollbar-hide', // Added scrollbar-hide class
+          'overflow-y-auto max-h-full scrollbar-hide',
           className
         )}
         {...props}

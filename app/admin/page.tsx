@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "../../components/ui/Select";
 import { Button } from "../../components/ui/Button";
+import ScrollArea from "../../components/ui/ScrollArea";
 import { Minus } from "lucide-react";
 
 interface Question {
@@ -42,8 +43,25 @@ export default function AdminPage() {
   const [activeQuestions, setActiveQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isSavingQuestion, setIsSavingQuestion] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const storedAuth = window.localStorage.getItem("codex-admin-auth");
+    if (storedAuth === "true") {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     const fetchActiveQuestions = async () => {
       try {
         const res = await fetch("/api/questions", { method: "GET" });
@@ -59,9 +77,13 @@ export default function AdminPage() {
     };
 
     fetchActiveQuestions();
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     const fetchSubmissions = async () => {
       try {
         const res = await fetch("/api/submissions", { method: "GET" });
@@ -77,15 +99,52 @@ export default function AdminPage() {
     };
 
     fetchSubmissions();
-  }, []);
+  }, [isAuthenticated]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "thisisaprotectedpasswordsurelynooneisguessingit") {
+    setErrorMessage("");
+    setResponseMessage("");
+    setIsLoggingIn(true);
+
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setErrorMessage(result?.error || "Failed to authenticate.");
+        return;
+      }
+
       setIsAuthenticated(true);
-      setErrorMessage("");
-    } else {
-      setErrorMessage("Invalid password");
+      setPassword("");
+      setResponseMessage("Welcome back, admin.");
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("codex-admin-auth", "true");
+      }
+    } catch (error) {
+      console.error("Error logging in:", error);
+      setErrorMessage("Unable to verify credentials. Please try again.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setPassword("");
+    setResponseMessage("");
+    setErrorMessage("");
+    setActiveQuestions([]);
+    setSubmissions([]);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("codex-admin-auth");
     }
   };
 
@@ -99,6 +158,7 @@ export default function AdminPage() {
     }
 
     try {
+      setIsSavingQuestion(true);
       const res = await fetch("/api/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -120,9 +180,13 @@ export default function AdminPage() {
       setQuestionName("");
       setDescription("");
       setAnswer("");
-      setActiveQuestions([...activeQuestions, data.question]);
+      setActiveQuestions((prev) =>
+        [...prev, data.question].sort((a, b) => a.name.localeCompare(b.name))
+      );
     } catch (error: any) {
       setResponseMessage(`Failed to add question: ${error.message}`);
+    } finally {
+      setIsSavingQuestion(false);
     }
   };
 
@@ -169,6 +233,8 @@ export default function AdminPage() {
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="current-password"
+                  placeholder="Enter admin password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -177,8 +243,13 @@ export default function AdminPage() {
               {errorMessage && (
                 <p className="text-sm text-red-500">{errorMessage}</p>
               )}
-              <Button type="submit" className="w-full">
-                Login
+              <Button
+                type="submit"
+                className="w-full"
+                variant="primary"
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? "Verifying..." : "Login"}
               </Button>
             </form>
           </CardContent>
@@ -190,45 +261,53 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-900 text-green-500 font-mono">
       {/* Left Side: Active Questions */}
-      <div className="w-full lg:w-1/4 flex flex-col border-r border-gray-700 p-4 overflow-y-auto bg-gray-800">
-        <Card className="bg-gray-800 text-green-500">
+      <div className="w-full lg:w-1/4 flex flex-col border-r border-gray-700 p-4 bg-gray-800">
+        <Card className="bg-gray-800 text-green-500 shadow-lg">
           <CardHeader>
             <CardTitle className="text-xl font-bold">Active Questions</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {activeQuestions.map((question) => (
-                <li
-                  key={question.id}
-                  className="flex items-center justify-between p-2 bg-gray-700 rounded-md"
-                >
-                  <span>
-                    {question.name} - {question.difficulty}
-                  </span>
-                  <div className="flex items-center">
-                    {deleteConfirmationId === question.id ? (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteConfirmation(question.id)}
-                        className="ml-2"
-                      >
-                        Delete
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteConfirmation(question.id)}
-                        aria-label={`Remove ${question.name}`}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
+          <CardContent className="p-0">
+            <ScrollArea className="max-h-[65vh] px-4 py-3">
+              {activeQuestions.length ? (
+                <ul className="space-y-2 pr-2">
+                  {activeQuestions.map((question) => (
+                    <li
+                      key={question.id}
+                      className="flex items-center justify-between p-3 bg-gray-700/70 rounded-md backdrop-blur-sm transition-colors hover:bg-gray-600/70"
+                    >
+                      <span className="text-sm">
+                        {question.name} - {question.difficulty}
+                      </span>
+                      <div className="flex items-center">
+                        {deleteConfirmationId === question.id ? (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteConfirmation(question.id)}
+                            className="ml-2"
+                          >
+                            Confirm
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteConfirmation(question.id)}
+                            aria-label={`Remove ${question.name}`}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-4 text-sm text-gray-400">
+                  No active questions yet. Add one using the form.
+                </div>
+              )}
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
@@ -238,6 +317,16 @@ export default function AdminPage() {
           <h2 className="text-3xl md:text-4xl font-bold text-green-500">
             Admin Dashboard
           </h2>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="border-green-500 text-green-400 hover:bg-green-500/10"
+            >
+              Logout
+            </Button>
+          </div>
         </div>
         <div className="flex-grow relative">
           <Card className="bg-gray-900 text-green-500">
@@ -289,8 +378,13 @@ export default function AdminPage() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full">
-                  Submit Question
+                <Button
+                  type="submit"
+                  className="w-full"
+                  variant="primary"
+                  disabled={isSavingQuestion}
+                >
+                  {isSavingQuestion ? "Saving..." : "Submit Question"}
                 </Button>
               </form>
               {responseMessage && (
@@ -298,7 +392,7 @@ export default function AdminPage() {
                   className={`mt-4 text-sm ${
                     responseMessage.includes("Failed")
                       ? "text-red-500"
-                      : "text-green-500"
+                      : "text-green-400"
                   }`}
                 >
                   {responseMessage}
@@ -309,39 +403,51 @@ export default function AdminPage() {
         </div>
       </div>
 
-<div className="w-full lg:w-1/4 flex flex-col border-l border-gray-700 p-4 bg-gray-800 h-full">
-  <Card className="bg-gray-800 text-green-500 h-full">
-    <CardHeader>
-      <CardTitle className="text-xl font-bold">Submissions</CardTitle>
-    </CardHeader>
-    <CardContent className="flex-grow overflow-y-auto max-h-full"> {/* Updated: max-h-full ensures container won't overflow */}
-      <ul className="space-y-2">
-        {submissions.map((submission) => (
-          <li key={submission.id} className="p-2 bg-gray-700 rounded-md">
-            <div className="flex justify-between">
-              <span className="font-semibold">{submission.userName}</span>
-              <span className="text-sm text-gray-400">
-                {new Date(submission.timestamp).toLocaleString()}
-              </span>
-            </div>
-            <div className="mt-1">
-              <span className="text-sm">Question: {submission.questionName}</span>
-            </div>
-            <div className="mt-1">
-              <span
-                className={`text-sm font-semibold ${
-                  submission.status === "Completed" ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {submission.status}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </CardContent>
-  </Card>
-</div>
+      <div className="w-full lg:w-1/4 flex flex-col border-l border-gray-700 p-4 bg-gray-800">
+        <Card className="bg-gray-800 text-green-500 h-full shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold">Submissions</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-grow p-0">
+            <ScrollArea className="h-full px-4 py-3">
+              {submissions.length ? (
+                <ul className="space-y-2 pr-2">
+                  {submissions.map((submission) => (
+                    <li key={submission.id} className="p-3 bg-gray-700/70 rounded-md backdrop-blur-sm">
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-sm">
+                          {submission.userName}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(submission.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="mt-1">
+                        <span className="text-xs text-gray-300">
+                          Question: {submission.questionName}
+                        </span>
+                      </div>
+                      <div className="mt-1">
+                        <span
+                          className={`text-xs font-semibold ${
+                            submission.status === "Completed" ? "text-green-400" : "text-red-400"
+                          }`}
+                        >
+                          {submission.status}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-4 text-sm text-gray-400">
+                  No submissions yet. Keep an eye on this space.
+                </div>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
